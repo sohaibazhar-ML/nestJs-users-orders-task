@@ -40,4 +40,18 @@ export class UsersService {
   async getAllUsers() {
     return this.prisma.user.findMany();
   }
+
+
+  async getUserWithOrders(id: number) {
+  const user = await this.prisma.user.findUnique({
+    where: { id },
+    include: { orders: true }, // fetch related orders
+  });
+
+  if (!user) {
+    throw new NotFoundException(`User with ID ${id} not found`);
+  }
+
+  return user;
+}
 }

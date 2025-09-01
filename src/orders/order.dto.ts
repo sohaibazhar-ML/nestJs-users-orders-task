@@ -10,6 +10,5 @@ export class CreateOrderDto {
 }
 
 export class UpdateOrderDto {
-  userId: number;
   product: string;
 }

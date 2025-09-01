@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Observable } from 'rxjs';
 
 @Injectable()
@@ -6,17 +6,21 @@ export class UserAuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    // Example logic: Check if the user is authenticated
-    // This could be checking for a token in the headers or a session variable
-    const userId = request.headers['x-user-id']; // Assuming user ID is passed in headers
+    // Check for user id in headers
+    const userId = request.headers['x-user-id'];
 
     if (!userId) {
-      return false; // Reject access if user ID is not present
+      throw new UnauthorizedException('Missing x-user-id header');
     }
 
-    // You can add more complex logic here, such as verifying the user ID
-    // against a database or an external service.
+    // You can add more validation here, e.g.:
+    // - check if userId exists in DB
+    // - validate JWT instead of plain header
+    // - etc.
 
-    return true; // Allow access if the user is authenticated
+    // Attach user info to request (optional)
+    request.user = { id: userId };
+
+    return true; // Allow access
   }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe, UseGuards,ParseIntPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { UserAuthGuard } from '../guards/user-auth.guard'; // adjust path
@@ -15,7 +15,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  getUser(@Param('id') id: number) {
+  getUser(@Param('id',ParseIntPipe) id: number) {
     return this.usersService.getUser(id);
   }
 
@@ -26,12 +26,17 @@ export class UsersController {
 
   @Put(':id')
   @UsePipes(new ValidationPipe())
-  updateUser(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+  updateUser(@Param('id',ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')
-  deleteUser(@Param('id') id: number) {
+  deleteUser(@Param('id',ParseIntPipe) id: number) {
     return this.usersService.deleteUser(id);
+  }
+
+  @Get(':id/with-orders')
+  getUserWithOrders(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.getUserWithOrders(id);
   }
 }

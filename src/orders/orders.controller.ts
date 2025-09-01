@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe,ParseIntPipe } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
 
@@ -13,7 +13,7 @@ export class OrdersController {
   }
 
   @Get(':id')
-  getOrder(@Param('id') id: number) {
+  getOrder(@Param('id',ParseIntPipe) id: number) {
     return this.ordersService.getOrder(id);
   }
 
@@ -24,17 +24,17 @@ export class OrdersController {
 
   @Put(':id')
   @UsePipes(new ValidationPipe())
-  updateOrder(@Param('id') id: number, @Body() updateOrderDto: UpdateOrderDto) {
+  updateOrder(@Param('id',ParseIntPipe) id: number, @Body() updateOrderDto: UpdateOrderDto) {
     return this.ordersService.updateOrder(id, updateOrderDto);
   }
 
   @Delete(':id')
-  deleteOrder(@Param('id') id: number) {
+  deleteOrder(@Param('id',ParseIntPipe) id: number) {
     return this.ordersService.deleteOrder(id);
   }
 
   @Get('user/:userId')
-  getOrdersByUser(@Param('userId') userId: number) {
+  getOrdersByUser(@Param('userId',ParseIntPipe) userId: number) {
     return this.ordersService.getOrdersByUser(userId);
   }
 }
