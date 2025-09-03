@@ -1,11 +1,16 @@
-import { BadRequestException, Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, InternalServerErrorException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
-
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
+  ) { }
 
   async createOrder(createOrderDto: CreateOrderDto) {
     return this.prisma.order.create({ data: createOrderDto });
@@ -35,12 +40,35 @@ export class OrdersService {
   }
 
   async getOrder(id: string) {
-    const order = await this.prisma.order.findUnique({ where: { id } });
+
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+    });
+
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
-    return order;
+
+    const userWithOrders = await this.usersService.getUserWithOrders(order.userId);
+
+    const userOrder = userWithOrders.orders.find((o) => o.id === id);
+
+    if (!userOrder) {
+      throw new NotFoundException(
+        `Order with ID ${id} not found for user ${order.userId}`,
+      );
+    }
+
+    return {
+      ...userOrder,
+      user: {
+        id: userWithOrders.id,
+        name: userWithOrders.name,
+        email: userWithOrders.email,
+      },
+    };
   }
+
 
   async getAllOrders() {
     return this.prisma.order.findMany();
