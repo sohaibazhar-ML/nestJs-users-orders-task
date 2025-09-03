@@ -1,7 +1,15 @@
-import { BadRequestException, Injectable, NotFoundException, InternalServerErrorException, Inject, forwardRef } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
 import { UsersService } from '../users/users.service';
+import { OrderResponseDto } from './order-response.dto';
 
 @Injectable()
 export class OrdersService {
@@ -12,38 +20,40 @@ export class OrdersService {
     private readonly usersService: UsersService,
   ) { }
 
-  async createOrder(createOrderDto: CreateOrderDto) {
-    return this.prisma.order.create({ data: createOrderDto });
+  async createOrder(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
+    const order = await this.prisma.order.create({ data: createOrderDto });
+    return new OrderResponseDto(order);
   }
 
-  async updateOrder(id: string, updateOrderDto: UpdateOrderDto) {
+  async updateOrder(id: string, updateOrderDto: UpdateOrderDto): Promise<OrderResponseDto> {
     const order = await this.prisma.order.findUnique({ where: { id } });
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
+
     // Prevent changing userId
     if ('userId' in updateOrderDto && updateOrderDto.userId !== order.userId) {
       throw new BadRequestException('User ID cannot be changed');
     }
-    return this.prisma.order.update({
+
+    const updated = await this.prisma.order.update({
       where: { id },
       data: updateOrderDto,
     });
+
+    return new OrderResponseDto(updated);
   }
 
-  async deleteOrder(id: string) {
+  async deleteOrder(id: string): Promise<OrderResponseDto> {
     const order = await this.prisma.order.delete({ where: { id } });
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
-    return order;
+    return new OrderResponseDto(order);
   }
 
-  async getOrder(id: string) {
-
-    const order = await this.prisma.order.findUnique({
-      where: { id },
-    });
+  async getOrder(id: string): Promise<OrderResponseDto> {
+    const order = await this.prisma.order.findUnique({ where: { id } });
 
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
@@ -51,7 +61,7 @@ export class OrdersService {
 
     const userWithOrders = await this.usersService.getUserWithOrders(order.userId);
 
-    const userOrder = userWithOrders.orders.find((o) => o.id === id);
+    const userOrder = userWithOrders.orders?.find((o) => o.id === id);
 
     if (!userOrder) {
       throw new NotFoundException(
@@ -59,22 +69,15 @@ export class OrdersService {
       );
     }
 
-    return {
-      ...userOrder,
-      user: {
-        id: userWithOrders.id,
-        name: userWithOrders.name,
-        email: userWithOrders.email,
-      },
-    };
+    return new OrderResponseDto(userOrder);
   }
 
-
-  async getAllOrders() {
-    return this.prisma.order.findMany();
+  async getAllOrders(): Promise<OrderResponseDto[]> {
+    const orders = await this.prisma.order.findMany();
+    return orders.map((order) => new OrderResponseDto(order));
   }
 
-  async getOrdersByUser(userId: string) {
+  async getOrdersByUser(userId: string): Promise<OrderResponseDto[]> {
     try {
       const orders = await this.prisma.order.findMany({
         where: { userId },
@@ -83,7 +86,7 @@ export class OrdersService {
         },
       });
 
-      return orders;
+      return orders.map((order) => new OrderResponseDto(order));
     } catch (error) {
       console.error(error);
 
@@ -96,5 +99,4 @@ export class OrdersService {
       );
     }
   }
-
 }

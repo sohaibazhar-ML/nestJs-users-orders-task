@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserResponseDto } from '../users/user-response.dto';
 
 export class OrderResponseDto {
   @ApiProperty()
@@ -9,8 +8,9 @@ export class OrderResponseDto {
   product: string;
 
   @ApiProperty()
-  userId: string;
+  quantity: number;
 
-  @ApiProperty({ type: () => UserResponseDto, required: false })
-  user?: UserResponseDto;
+  constructor(partial: Partial<OrderResponseDto>) {
+    Object.assign(this, partial);
+  }
 }
