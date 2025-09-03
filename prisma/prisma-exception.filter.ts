@@ -1,4 +1,4 @@
-// src/prisma/prisma-exception.filter.ts
+
 import {
   ExceptionFilter,
   Catch,
