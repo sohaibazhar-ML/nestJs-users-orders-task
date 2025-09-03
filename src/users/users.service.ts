@@ -10,7 +10,7 @@ export class UsersService {
     return this.prisma.user.create({ data: createUserDto });
   }
 
-  async updateUser(id: number, updateUserDto: UpdateUserDto) {
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.prisma.user.update({
       where: { id },
       data: updateUserDto,
@@ -21,7 +21,7 @@ export class UsersService {
     return user;
   }
 
-  async deleteUser(id: number) {
+  async deleteUser(id: string) {
     const user = await this.prisma.user.delete({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -29,7 +29,7 @@ export class UsersService {
     return user;
   }
 
-  async getUser(id: number) {
+  async getUser(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -42,7 +42,7 @@ export class UsersService {
   }
 
 
-  async getUserWithOrders(id: number) {
+  async getUserWithOrders(id: string) {
   const user = await this.prisma.user.findUnique({
     where: { id },
     include: { orders: true }, // fetch related orders

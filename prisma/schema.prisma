@@ -8,10 +8,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator cuid {
-  provider = "node_modules/cuid"
-  output   = "./src/utils/cuid.ts" 
-}
 
 datasource db {
   provider = "postgresql"
@@ -19,15 +15,15 @@ datasource db {
 }
 
 model User {
-  uid      String   @id @default(cuid()) @unique
+  id      String   @id @default(uuid()) 
   email    String   @unique
   name     String?
   orders   Order[]
 }
 
 model Order {
-  uid      String   @id @default(cuid()) @unique
+  id      String   @id @default(uuid()) 
   userId   String
   product  String
-  user     User     @relation(fields: [userId], references: [uid])
+  user     User     @relation(fields: [userId], references: [id])
 }

@@ -15,7 +15,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  getUser(@Param('id',ParseIntPipe) id: number) {
+  getUser(@Param('id',ParseIntPipe) id: string) {
     return this.usersService.getUser(id);
   }
 
@@ -26,17 +26,17 @@ export class UsersController {
 
   @Put(':id')
   @UsePipes(new ValidationPipe())
-  updateUser(@Param('id',ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
+  updateUser(@Param('id',ParseIntPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')
-  deleteUser(@Param('id') id: number) {
+  deleteUser(@Param('id') id: string) {
     return this.usersService.deleteUser(id);
   }
 
   @Get(':id/with-orders')
-  getUserWithOrders(@Param('id', ParseIntPipe) id: number) {
+  getUserWithOrders(@Param('id', ParseIntPipe) id: string) {
     return this.usersService.getUserWithOrders(id);
   }
 }

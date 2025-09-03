@@ -4,26 +4,24 @@ import { CreateOrderDto, UpdateOrderDto } from './order.dto';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async createOrder(createOrderDto: CreateOrderDto) {
     return this.prisma.order.create({ data: createOrderDto });
   }
 
-  async updateOrder(id: number, updateOrderDto: UpdateOrderDto) {
+  async updateOrder(id: string, updateOrderDto: UpdateOrderDto) {
     const order = await this.prisma.order.findUnique({ where: { id } });
     if (!order) {
-      throw new NotFoundException(`Order with id ${id} not found`);
+      throw new NotFoundException(`Order with ID ${id} not found`);
     }
-
     // Prevent changing userId
     if ('userId' in updateOrderDto && updateOrderDto.userId !== order.userId) {
       throw new BadRequestException('User ID cannot be changed');
     }
-
     return this.prisma.order.update({
       where: { id },
-      data: updateOrderDto
+      data: updateOrderDto,
     });
   }
 
@@ -35,7 +33,7 @@ export class OrdersService {
     return order;
   }
 
-  async getOrder(id: number) {
+  async getOrder(id: string) {
     const order = await this.prisma.order.findUnique({ where: { id } });
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
@@ -47,25 +45,21 @@ export class OrdersService {
     return this.prisma.order.findMany();
   }
 
-  async getOrdersByUser(orderId: number) {
+  async getOrdersByUser(userId: string) {
     try {
-      const order = await this.prisma.order.findUnique({
-        where: { id: orderId }, // order id as primary key
+      const orders = await this.prisma.order.findMany({
+        where: { userId }, 
         include: {
-          user: true, // include related user details
+          user: true,
         },
       });
-
-      if (!order) {
-        throw new NotFoundException(`Order with ID ${orderId} not found`);
+      if (!orders || orders.length === 0) {
+        throw new NotFoundException(`Orders with User ID ${userId} not found`);
       }
-
-      return order;
+      return orders;
     } catch (error) {
-      // You can log error here for debugging
       console.error(error);
-      throw new InternalServerErrorException('Something went wrong while fetching the order');
+      throw new InternalServerErrorException('Something went wrong while fetching the orders');
     }
   }
 }
-
