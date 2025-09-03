@@ -2,9 +2,10 @@ import { BadRequestException, Injectable, NotFoundException, InternalServerError
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto, UpdateOrderDto } from './order.dto';
 
+
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async createOrder(createOrderDto: CreateOrderDto) {
     return this.prisma.order.create({ data: createOrderDto });
@@ -48,18 +49,24 @@ export class OrdersService {
   async getOrdersByUser(userId: string) {
     try {
       const orders = await this.prisma.order.findMany({
-        where: { userId }, 
+        where: { userId },
         include: {
           user: true,
         },
       });
-      if (!orders || orders.length === 0) {
-        throw new NotFoundException(`Orders with User ID ${userId} not found`);
-      }
+
       return orders;
     } catch (error) {
       console.error(error);
-      throw new InternalServerErrorException('Something went wrong while fetching the orders');
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(
+        'Something went wrong while fetching the orders',
+      );
     }
   }
+
 }

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPipe, UseGuards,ParseIntPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
-import { UserAuthGuard } from '../guards/user-auth.guard'; // adjust path
+import { UserAuthGuard } from '../guards/user-auth.guard'; 
 
 @UseGuards(UserAuthGuard)  // ✅ applies to ALL routes
 @Controller('users')
@@ -15,7 +15,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  getUser(@Param('id',ParseIntPipe) id: string) {
+  getUser(@Param('id') id: string) {
     return this.usersService.getUser(id);
   }
 
@@ -26,7 +26,7 @@ export class UsersController {
 
   @Put(':id')
   @UsePipes(new ValidationPipe())
-  updateUser(@Param('id',ParseIntPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
+  updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.updateUser(id, updateUserDto);
   }
 
@@ -36,7 +36,7 @@ export class UsersController {
   }
 
   @Get(':id/with-orders')
-  getUserWithOrders(@Param('id', ParseIntPipe) id: string) {
+  getUserWithOrders(@Param('id') id: string) {
     return this.usersService.getUserWithOrders(id);
   }
 }
