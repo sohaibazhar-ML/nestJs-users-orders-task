@@ -27,7 +27,7 @@ export class OrdersService {
     });
   }
 
-  async deleteOrder(id: number) {
+  async deleteOrder(id: string) {
     const order = await this.prisma.order.delete({ where: { id } });
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);

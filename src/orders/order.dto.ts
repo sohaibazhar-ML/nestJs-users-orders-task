@@ -2,7 +2,7 @@ import { IsNotEmpty,IsString } from 'class-validator';
 
 export class CreateOrderDto {
   @IsNotEmpty()
-  userId: number;
+  userId: string;
 
   @IsNotEmpty()
   @IsString()

@@ -29,7 +29,8 @@ export class OrdersController {
   }
 
   @Delete(':id')
-  deleteOrder(@Param('id',ParseIntPipe) id: number) {
+  deleteOrder(@Param('id') id: string) {
+    console.log(typeof id +'ID Here');
     return this.ordersService.deleteOrder(id);
   }
 
