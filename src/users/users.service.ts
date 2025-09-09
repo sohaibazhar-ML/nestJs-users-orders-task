@@ -12,7 +12,7 @@ export class UsersService {
 
     @Inject(forwardRef(() => OrdersService))
     private readonly ordersService: OrdersService,
-  ) {}
+  ) { }
 
   async createUser(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const user = await this.prisma.user.create({ data: createUserDto });
@@ -82,4 +82,18 @@ export class UsersService {
       name: user.name,
     };
   }
+
+  async findByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        password: true, // ✅ include password
+      },
+    });
+  }
+
+
 }

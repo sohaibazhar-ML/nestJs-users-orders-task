@@ -2,8 +2,10 @@ import { Body, Controller, Delete, Get, Param, Post, Put, UsePipes, ValidationPi
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { UserAuthGuard } from '../guards/user-auth.guard'; 
+import { JwtAuthGuard } from '../auth/jwt-auth.guard/jwt-auth.guard';
 
-@UseGuards(UserAuthGuard)  
+
+@UseGuards(JwtAuthGuard)  
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
