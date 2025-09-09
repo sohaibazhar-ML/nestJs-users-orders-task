@@ -8,10 +8,11 @@ datasource db {
 }
 
 model User {
-  email  String  @unique
-  name   String?
-  id     String  @id @default(uuid())
-  orders Order[]
+  id       String  @id @default(uuid())
+  email    String  @unique
+  name     String?
+  password String   // hashed password
+  orders   Order[]
 }
 
 model Order {
