@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
 import { UserAuthGuard } from '../guards/user-auth.guard'; 
 
-@UseGuards(UserAuthGuard)  // ✅ applies to ALL routes
+@UseGuards(UserAuthGuard)  
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
