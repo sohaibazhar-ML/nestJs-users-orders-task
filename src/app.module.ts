@@ -7,9 +7,13 @@ import { PrismaService } from './prisma/prisma.service';
 import { MiddlewareConsumer } from '@nestjs/common';
 import { LoggingMiddleware } from './middleware/logging.middleware'
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+     ConfigModule.forRoot({
+      isGlobal: true, // makes .env available everywhere
+    }),
     forwardRef(() => UsersModule),
     forwardRef(() => OrdersModule),
     AuthModule,

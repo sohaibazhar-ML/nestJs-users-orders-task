@@ -7,9 +7,6 @@ export class OrderResponseDto {
   @ApiProperty()
   product: string;
 
-  @ApiProperty()
-  quantity: number;
-
   constructor(partial: Partial<OrderResponseDto>) {
     Object.assign(this, partial);
   }
