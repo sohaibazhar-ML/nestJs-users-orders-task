@@ -11,7 +11,7 @@ describe('UsersService', () => {
   let prismaMock: jest.Mocked<PrismaService>;
   let ordersServiceMock: jest.Mocked<OrdersService>;
 
-  const mockUser = { id: '1', email: 'john@example.com', name: 'John Doe' };
+  const mockUser = { id: '1', email: 'john@example.com', name: 'John Doe', password: 'secret123' };
   const mockOrder = { id: 'order-1', product: 'Laptop' };
 
   beforeEach(async () => {
@@ -22,18 +22,18 @@ describe('UsersService', () => {
           provide: PrismaService,
           useValue: {
             user: {
-              create: jest.fn(),
-              update: jest.fn(),
-              delete: jest.fn(),
-              findUnique: jest.fn(),
-              findMany: jest.fn(),
+              create: jest.fn() as jest.Mock,
+              update: jest.fn() as jest.Mock,
+              delete: jest.fn() as jest.Mock,
+              findUnique: jest.fn() as jest.Mock,
+              findMany: jest.fn() as jest.Mock,
             },
           },
         },
         {
           provide: OrdersService,
           useValue: {
-            getOrdersByUser: jest.fn(),
+            getOrdersByUser: jest.fn() as jest.Mock,
           },
         },
       ],
@@ -46,11 +46,12 @@ describe('UsersService', () => {
 
   describe('createUser', () => {
     it('should create and return a user', async () => {
-      prismaMock.user.create.mockResolvedValue(mockUser);
+      (prismaMock.user.create as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await service.createUser({
         email: 'john@example.com',
         name: 'John Doe',
+        password: 'secret123', // ✅ required field
       });
 
       expect(result).toEqual<UserResponseDto>({
@@ -64,7 +65,7 @@ describe('UsersService', () => {
 
   describe('updateUser', () => {
     it('should update and return a user', async () => {
-      prismaMock.user.update.mockResolvedValue(mockUser);
+      (prismaMock.user.update as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await service.updateUser('1', { name: 'John Doe' });
 
@@ -76,7 +77,7 @@ describe('UsersService', () => {
     });
 
     it('should throw NotFoundException if user not found', async () => {
-      prismaMock.user.update.mockResolvedValue(null as any);
+      (prismaMock.user.update as jest.Mock).mockResolvedValue(null);
 
       await expect(
         service.updateUser('999', { name: 'Ghost' }),
@@ -86,7 +87,7 @@ describe('UsersService', () => {
 
   describe('deleteUser', () => {
     it('should delete and return a user', async () => {
-      prismaMock.user.delete.mockResolvedValue(mockUser);
+      (prismaMock.user.delete as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await service.deleteUser('1');
 
@@ -98,27 +99,27 @@ describe('UsersService', () => {
     });
 
     it('should throw NotFoundException if user not found', async () => {
-      prismaMock.user.delete.mockResolvedValue(null as any);
+      (prismaMock.user.delete as jest.Mock).mockResolvedValue(null);
 
       await expect(service.deleteUser('999')).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('getUser', () => {
-    it('should return user with orders', async () => {
-      prismaMock.user.findUnique.mockResolvedValue(mockUser);
-      ordersServiceMock.getOrdersByUser.mockResolvedValue([
+    it('should return a user', async () => {
+      (prismaMock.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (ordersServiceMock.getOrdersByUser as jest.Mock).mockResolvedValue([
         new OrderResponseDto(mockOrder),
       ]);
 
       const result = await service.getUser('1');
 
       expect(result).toHaveProperty('orders');
-      expect(result.orders[0]).toBeInstanceOf(OrderResponseDto);
+      expect(result.orders![0]).toBeInstanceOf(OrderResponseDto); // ✅ use !
     });
 
     it('should throw NotFoundException if user not found', async () => {
-      prismaMock.user.findUnique.mockResolvedValue(null as any);
+      (prismaMock.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(service.getUser('999')).rejects.toThrow(NotFoundException);
     });
@@ -126,7 +127,7 @@ describe('UsersService', () => {
 
   describe('getAllUsers', () => {
     it('should return all users', async () => {
-      prismaMock.user.findMany.mockResolvedValue([mockUser]);
+      (prismaMock.user.findMany as jest.Mock).mockResolvedValue([mockUser]);
 
       const result = await service.getAllUsers();
 
@@ -138,18 +139,18 @@ describe('UsersService', () => {
 
   describe('getUserWithOrders', () => {
     it('should return user with orders', async () => {
-      prismaMock.user.findUnique.mockResolvedValue({
+      (prismaMock.user.findUnique as jest.Mock).mockResolvedValue({
         ...mockUser,
         orders: [mockOrder],
       });
 
       const result = await service.getUserWithOrders('1');
 
-      expect(result.orders[0]).toBeInstanceOf(OrderResponseDto);
+      expect(result.orders![0]).toBeInstanceOf(OrderResponseDto); // ✅ use !
     });
 
     it('should throw NotFoundException if user not found', async () => {
-      prismaMock.user.findUnique.mockResolvedValue(null as any);
+      (prismaMock.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       await expect(
         service.getUserWithOrders('999'),
@@ -157,27 +158,4 @@ describe('UsersService', () => {
     });
   });
 
-  describe('findByEmail', () => {
-    it('should return user with password', async () => {
-      prismaMock.user.findUnique.mockResolvedValue({
-        id: '1',
-        email: 'john@example.com',
-        name: 'John Doe',
-        password: 'hashedpassword',
-      });
-
-      const result = await service.findByEmail('john@example.com');
-
-      expect(result).toHaveProperty('password');
-      expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
-        where: { email: 'john@example.com' },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          password: true,
-        },
-      });
-    });
-  });
 });

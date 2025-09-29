@@ -32,7 +32,11 @@ describe('UsersController', () => {
 
   describe('createUser', () => {
     it('should create a user', async () => {
-      const dto = { name: 'John Doe', email: 'john@example.com' };
+      const dto = {
+        name: 'John Doe',
+        email: 'john@example.com',
+        password: 'secret123', // ✅ required field added
+      };
       expect(await usersController.createUser(dto)).toEqual({
         id: '1',
         ...dto,
@@ -60,7 +64,7 @@ describe('UsersController', () => {
 
   describe('updateUser', () => {
     it('should update a user', async () => {
-      const dto = { name: 'Jane Doe' };
+      const dto = { name: 'Jane Doe' }; // update DTO doesn’t require password
       expect(await usersController.updateUser('1', dto)).toEqual({
         id: '1',
         ...dto,
